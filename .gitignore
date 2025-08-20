@@ -1,0 +1,26 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Environment
+.env
+
+# Django static & media
+staticfiles/
+media/
+
+# IDE / OS files
+*.log
+.vscode/
+.idea/
+.DS_Store
+
+# Build / cache
+*.egg-info/
+.eggs/
+dist/
+build/
