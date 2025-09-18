@@ -1,6 +1,7 @@
 # Python
 __pycache__/
 *.py[cod]
+*$py.class
 venv/
 
 # Django
@@ -8,9 +9,10 @@ venv/
 db.sqlite3
 staticfiles/
 
-# Sensitive Data & Environment
+# Sensitive & Environment
 .env
-.env.production
+.env.*
+!.env.example
 firebase-service-account-key.json
 *service-account*.json
 *.pem
@@ -18,3 +20,4 @@ firebase-service-account-key.json
 
 # IDE
 .vscode/
+.idea/
