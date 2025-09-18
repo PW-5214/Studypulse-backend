@@ -151,14 +151,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Django REST framework settings (Original)
+# Django REST framework settings (Modified)
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        # Allow read-only access for unauthenticated users, require auth for write.
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-    ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
     )
 }
 
@@ -166,6 +165,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
 # CORS Settings - Allow requests from React development server
