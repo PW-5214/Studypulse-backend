@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: studypulse-backend
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn studypulse_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: WEB_CONCURRENCY
+        value: 4
+
+databases:
+  - name: studypulse-db
+    ipAllowList: []

@@ -10,35 +10,29 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+import dj_database_url
 from dotenv import load_dotenv
+from datetime import timedelta  # Add this import
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Load environment variables from .env file
-dotenv_path = BASE_DIR / '.env' 
-load_dotenv(dotenv_path=dotenv_path)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-placeholder-key-replace-me' # Replace with a real secret key
-
-# Get Google API Key from environment
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-
-if not GOOGLE_API_KEY:
-    print(f"Warning: GOOGLE_API_KEY not found in {dotenv_path}. Video/Audio summarization may fail.")
-    # Consider raising ImproperlyConfigured or logging a more severe warning
+SECRET_KEY = os.getenv('SECRET_KEY')  # Replace with a real secret key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -49,15 +43,15 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',  # Make sure this is included
     'rest_framework',
     'corsheaders',
-    'api', # Our app
-    # Add other apps here (e.g., corsheaders if needed)
+    'api',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this after security middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -65,7 +59,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # Add corsheaders middleware if frontend and backend are on different origins
 ]
 
 ROOT_URLCONF = 'studypulse_project.urls'
@@ -92,12 +85,23 @@ WSGI_APPLICATION = 'studypulse_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database Configuration
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.parse(
+            os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -134,8 +138,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # For production deployment
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Media files (User uploads)
 MEDIA_URL = '/media/'
@@ -152,17 +158,21 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # Allow read-only access for unauthenticated users, require auth for write.
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
-    # DEFAULT_AUTHENTICATION_CLASSES was not set previously
+}
+
+# JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
 # CORS Settings - Allow requests from React development server
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",    # React default port
-    "http://127.0.0.1:3000",
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com"
 ]
-
-# CORS_ALLOW_HEADERS removed
-
-# Optionally, you can allow all origins (less secure, useful for initial development)
-# CORS_ALLOW_ALL_ORIGINS = True 

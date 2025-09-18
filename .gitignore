@@ -1,26 +1,23 @@
 # Python
-venv/
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.sqlite3
+*.py[cod]
+*.so
+.Python
+venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+staticfiles/
 
 # Environment
 .env
+.env.local
+.env.production
+firebase-service-account-key.json
 
-# Django static & media
-staticfiles/
-media/
-
-# IDE / OS files
-*.log
+# IDE
 .vscode/
-.idea/
-.DS_Store
-
-# Build / cache
-*.egg-info/
-.eggs/
-dist/
-build/
+*.swp

@@ -4,6 +4,9 @@ from rest_framework import authentication, exceptions
 from django.contrib.auth.models import User
 import os
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FirebaseAuthentication(authentication.BaseAuthentication):
     """
@@ -48,44 +51,36 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
                      raise exceptions.AuthenticationFailed('Firebase Admin SDK service key not found.')
             
             print("Firebase Auth: Calling auth.verify_id_token()...")
+            # Get decoded token info
             decoded_token = auth.verify_id_token(id_token)
-            print("Firebase Auth: Token verification successful.")
-            
-            firebase_uid = decoded_token.get('uid')
+            uid = decoded_token.get('uid')
             email = decoded_token.get('email')
-            print(f"Firebase Auth: Token decoded - UID: {firebase_uid}, Email: {email}")
-            
-            if not firebase_uid or not email:
-                print("Firebase Auth: ERROR - Invalid token claims (missing UID or email)")
-                raise exceptions.AuthenticationFailed('Invalid token claims (missing UID or email)')
 
-            print(f"Firebase Auth: Getting or creating Django user for email: {email}")
-            user, created = User.objects.get_or_create(
-                email=email,
-                defaults={
-                    'username': email, 
-                }
-            )
-            print(f"Firebase Auth: User {'created' if created else 'found'}: {user.username}")
-            return (user, decoded_token)
+            logger.info(f"Firebase Auth: Token decoded - UID: {uid}, Email: {email}")
 
-        except auth.ExpiredIdTokenError as e:
-            print(f"Firebase Auth: ERROR - Token expired: {e}")
-            raise exceptions.AuthenticationFailed('Firebase ID token has expired.')
-        except auth.RevokedIdTokenError as e:
-            print(f"Firebase Auth: ERROR - Token revoked: {e}")
-            raise exceptions.AuthenticationFailed('Firebase ID token has been revoked.')
-        except auth.InvalidIdTokenError as e:
-            print(f"Firebase Auth: ERROR - Invalid ID Token: {e}")
-            raise exceptions.AuthenticationFailed(f'Invalid Firebase ID token: {e}')
-        except User.DoesNotExist:
-            print(f"Firebase Auth: ERROR - User.DoesNotExist (unexpected with get_or_create)")
-            raise exceptions.AuthenticationFailed('Could not find or create Django user.')
+            # Modified user lookup logic
+            try:
+                # Try to get existing user
+                user = User.objects.filter(email=email).first()
+                if not user:
+                    # Create new user if none exists
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email
+                    )
+                    logger.info(f"Firebase Auth: Created new user for email: {email}")
+                else:
+                    logger.info(f"Firebase Auth: Found existing user for email: {email}")
+                
+                return (user, None)
+
+            except Exception as e:
+                logger.error(f"Firebase Auth: Error processing user: {str(e)}")
+                raise exceptions.AuthenticationFailed('User authentication failed')
+
         except Exception as e:
-            import traceback
-            print(f"Firebase Auth: UNEXPECTED ERROR during authentication: {e}")
-            print(traceback.format_exc())
-            raise exceptions.AuthenticationFailed(f'Firebase authentication failed: {e}')
+            logger.error(f"Firebase Auth: Authentication failed: {str(e)}")
+            raise exceptions.AuthenticationFailed('Invalid token')
 
     def authenticate_header(self, request):
-        return 'Bearer realm="Firebase"' 
+        return 'Bearer realm="Firebase"'
