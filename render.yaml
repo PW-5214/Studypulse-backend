@@ -9,7 +9,3 @@ services:
         value: 3.11.0
       - key: WEB_CONCURRENCY
         value: 4
-
-databases:
-  - name: studypulse-db
-    ipAllowList: []

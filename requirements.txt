@@ -12,7 +12,7 @@ Django==5.2.6
 django-cors-headers==4.8.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
-firebase_admin==7.1.0
+firebase-admin==7.1.0
 google-ai-generativelanguage==0.6.15
 google-api-core==2.25.1
 google-api-python-client==2.181.0
@@ -57,3 +57,6 @@ typing_extensions==4.15.0
 tzdata==2025.2
 uritemplate==4.2.0
 urllib3==2.5.0
+dj-database-url
+gunicorn
+whitenoise

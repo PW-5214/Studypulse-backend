@@ -1,22 +1,18 @@
+# Sensitive files
+firebase-service-account-key.json
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 venv/
 
 # Django
 *.log
 db.sqlite3
 staticfiles/
-
-# Sensitive & Environment
-.env
-.env.*
-!.env.example
-firebase-service-account-key.json
-*service-account*.json
-*.pem
-*.key
 
 # IDE
 .vscode/
