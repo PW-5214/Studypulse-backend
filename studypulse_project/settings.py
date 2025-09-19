@@ -32,6 +32,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')  # Replace with a real secret key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+
 ALLOWED_HOSTS = ['*']
 
 # Security settings
@@ -173,5 +174,6 @@ CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
-    "https://*.studypulse.vercel.app"
+    "https://*.studypulse.vercel.app",
+    "https://*.railway.app"
 ]
